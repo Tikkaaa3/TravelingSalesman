@@ -44,7 +44,7 @@ def fitness_function(solution, cities):
     return res
 
 
-def info(solution, cities):
+def solution_info(solution, cities):
     score = fitness_function(solution, cities)
     print(solution)
     print(score)
@@ -69,3 +69,46 @@ def greedy(cities, start):
             solution = np.append(solution, start)
             break
     return solution
+
+
+def initial_population(cities):
+    population = []
+
+    for _ in range(17):
+        city_nodes = np.arange(1, len(cities) + 1)
+        city_nodes = np.append(city_nodes, city_nodes[0])
+        np.random.shuffle(city_nodes)
+        population.append(city_nodes)
+
+    for i in range(1, 4):
+        solution = greedy(cities, i)
+        population.append(solution)
+
+    population = np.array(population)
+    return population
+
+
+def population_info(population, cities):
+    fitness_scores = []
+    for solution in population:
+        fitness_scores.append(fitness_function(solution, cities))
+
+    fitness_scores = np.array(fitness_scores)
+    best_score = np.min(fitness_scores)
+    median_score = np.median(fitness_scores)
+
+    print(f"Best score: {best_score}")
+    print(f"Median score: {median_score}")
+    print("All fitness scores:", fitness_scores)
+
+
+def tournament(population, cities):
+    return
+
+
+def elite(population, cities):
+    return
+
+
+def cycle_crossover(population, cities):
+    return
