@@ -76,8 +76,8 @@ def initial_population(cities):
 
     for _ in range(17):
         city_nodes = np.arange(1, len(cities) + 1)
-        city_nodes = np.append(city_nodes, city_nodes[0])
         np.random.shuffle(city_nodes)
+        city_nodes = np.append(city_nodes, city_nodes[0])
         population.append(city_nodes)
 
     for i in range(1, 4):
@@ -93,21 +93,42 @@ def population_info(population, cities):
     for solution in population:
         fitness_scores.append(fitness_function(solution, cities))
 
+    population_w_fitness = pd.DataFrame({'Solution': [solution for solution in population],
+                                         'Fitness': fitness_scores})
     fitness_scores = np.array(fitness_scores)
     best_score = np.min(fitness_scores)
     median_score = np.median(fitness_scores)
 
-    print(f"Best score: {best_score}")
-    print(f"Median score: {median_score}")
-    print("All fitness scores:", fitness_scores)
+    print("Population Information (Solutions with Fitness Scores):")
+    print(population_w_fitness)
+    print(f"\nBest score: {best_score}")
+    print(f"\nMedian score: {median_score}")
+
+    return population_w_fitness
 
 
-def tournament(population, cities):
-    return
+def tournament(population_w_fitness):
+
+    tournament_solutions = []
+    for _ in range(0, 8):
+        tournament_rows = population_w_fitness.sample(n=4)
+        winner = tournament_rows.sort_values(by='Fitness').head(1)
+        winner_solution = winner['Solution'].iloc[0]
+        tournament_solutions.append(winner_solution)
+        population_w_fitness.drop(winner.index, inplace=True)
+    return np.array(tournament_solutions)
 
 
-def elite(population, cities):
-    return
+def elite(population_w_fitness):
+
+    # Sort the DataFrame by fitness in ascending order and select the top two
+    elites = population_w_fitness.sort_values(by='Fitness').head(2)
+    elite_solutions = elites['Solution'].values
+
+    # Remove the elite rows from the original DataFrame
+    population_w_fitness.drop(elites.index, inplace=True)
+
+    return np.array(elite_solutions)
 
 
 def cycle_crossover(population, cities):
