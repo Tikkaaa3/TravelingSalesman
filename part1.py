@@ -44,7 +44,7 @@ print(parents)
 
 epoch = 0
 best_scores = []
-while epoch < 100:
+while epoch < 500:
     # reset the pop for creating the new generation
     population = []
 
@@ -61,5 +61,12 @@ while epoch < 100:
     tournament_solutions = tsp.tournament(population_w_fitness)
     parents = np.concatenate((elite_solutions, tournament_solutions))
     epoch += 1
+best_scores = np.array(best_scores)
+best_score = np.min(best_scores)
+mean = np.mean(best_scores)
 print("\nBest Solutions:")
 print(best_scores)
+print("\nMean:")
+print(mean)
+print("\nBest Score:")
+print(best_score)
