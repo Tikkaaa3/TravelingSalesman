@@ -134,13 +134,13 @@ def elite(population_w_fitness):
 
 
 def swap(parent):
-    # Randomly select two distinct indices
-    index_1, index_2 = np.random.choice(len(parent), size=2, replace=False)
+    # Randomly select two distinct indices and do not select first or last one
+    index_1, index_2 = np.random.choice(np.arange(1, len(parent) - 1), size=2, replace=False)
     parent[index_1], parent[index_2] = parent[index_2], parent[index_1]
     return parent
 
 
-def cycle_crossover(parents, mutation_chance=0.018):
+def cycle_crossover(parents, mutation_chance=0.028):
     # randomly select 2 parents but not the same(replace=False)
     selected_indices = np.random.choice(len(parents), size=2, replace=False)
     parent_x, parent_y = parents[selected_indices]
