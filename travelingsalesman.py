@@ -74,17 +74,16 @@ def greedy(cities, start):
 def initial_population(cities):
     population = []
 
-    for _ in range(17):
+    for _ in range(95):
         city_nodes = np.arange(1, len(cities) + 1)
         np.random.shuffle(city_nodes)
         city_nodes = np.append(city_nodes, city_nodes[0])
         population.append(city_nodes)
 
-    for i in range(1, 4):
+    for i in range(1, 6):
         solution = greedy(cities, i)
         population.append(solution)
 
-    population = np.array(population)
     return population
 
 
@@ -104,32 +103,80 @@ def population_info(population, cities):
     print(f"\nBest score: {best_score}")
     print(f"\nMedian score: {median_score}")
 
-    return population_w_fitness
+    return population_w_fitness, best_score
 
 
 def tournament(population_w_fitness):
 
     tournament_solutions = []
-    for _ in range(0, 8):
+    for _ in range(0, 46):
+
+        # drop function is necessary because I want to select parents once
+        # (for example 100 init pop to 50 unique parents)
         tournament_rows = population_w_fitness.sample(n=4)
         winner = tournament_rows.sort_values(by='Fitness').head(1)
         winner_solution = winner['Solution'].iloc[0]
         tournament_solutions.append(winner_solution)
         population_w_fitness.drop(winner.index, inplace=True)
-    return np.array(tournament_solutions)
+    return tournament_solutions
 
 
 def elite(population_w_fitness):
 
     # Sort the DataFrame by fitness in ascending order and select the top two
-    elites = population_w_fitness.sort_values(by='Fitness').head(2)
-    elite_solutions = elites['Solution'].values
+    elites = population_w_fitness.sort_values(by='Fitness').head(4)
+    elite_solutions = [elite for elite in elites['Solution'].values]
 
     # Remove the elite rows from the original DataFrame
     population_w_fitness.drop(elites.index, inplace=True)
 
-    return np.array(elite_solutions)
+    return elite_solutions
 
 
-def cycle_crossover(population, cities):
-    return
+def swap(parent):
+    # Randomly select two distinct indices
+    index_1, index_2 = np.random.choice(len(parent), size=2, replace=False)
+    parent[index_1], parent[index_2] = parent[index_2], parent[index_1]
+    return parent
+
+
+def cycle_crossover(parents, mutation_chance=0.018):
+    # randomly select 2 parents but not the same(replace=False)
+    selected_indices = np.random.choice(len(parents), size=2, replace=False)
+    parent_x, parent_y = parents[selected_indices]
+    parent_x = parent_x[:-1]
+    parent_y = parent_y[:-1]
+    random_index = np.random.randint(0, len(parent_x)-1)
+    order = []
+    index_x = random_index
+    val_y = parent_y[index_x]
+
+    while True:
+        order.append(index_x)
+        for i, val in enumerate(parent_x):
+            if val == val_y:
+                index_x = i
+                val_y = parent_y[index_x]
+                break
+
+        if index_x == random_index:
+            break
+
+    # NumPy evaluates the assignment from right to left.
+    # Without .copy(), the values of parent_x[order]
+    # might get modified in-place as soon as parent_y[order] is assigned to it.
+    # This can corrupt the values of parent_x[order] before they are assigned to parent_y[order].
+    parent_x[order], parent_y[order] = parent_y[order], parent_x[order].copy()
+    kid1 = np.append(parent_x, parent_x[0])
+    kid2 = np.append(parent_y, parent_y[0])
+
+    # np random random creates a float value between 0 and 1
+    if np.random.random() < mutation_chance:
+        kid1 = swap(kid1)
+        print("Mutation applied to Parent X")
+    if np.random.random() < mutation_chance:
+        kid2 = swap(kid2)
+        print("Mutation applied to Parent Y")
+
+    # we actually created kid1 and kid2
+    return kid1, kid2
