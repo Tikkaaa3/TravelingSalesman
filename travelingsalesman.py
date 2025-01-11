@@ -74,13 +74,21 @@ def greedy(cities, start):
 def initial_population(cities):
     population = []
 
-    for _ in range(95):
+    for _ in range(395):
         city_nodes = np.arange(1, len(cities) + 1)
         np.random.shuffle(city_nodes)
         city_nodes = np.append(city_nodes, city_nodes[0])
         population.append(city_nodes)
 
-    for i in range(1, 6):
+    # for i in range(1, 6):
+    #    solution = greedy(cities, i)
+    #    population.append(solution)
+
+    # Generate 5 unique random values from 1 to len(cities)
+    random_indices = np.random.choice(range(1, len(cities) + 1), size=5, replace=False)
+
+    # Generate solutions
+    for i in random_indices:
         solution = greedy(cities, i)
         population.append(solution)
 
@@ -109,11 +117,11 @@ def population_info(population, cities):
 def tournament(population_w_fitness):
 
     tournament_solutions = []
-    for _ in range(0, 46):
+    for _ in range(0, 195):
 
         # drop function is necessary because I want to select parents once
         # (for example 100 init pop to 50 unique parents)
-        tournament_rows = population_w_fitness.sample(n=4)
+        tournament_rows = population_w_fitness.sample(n=5)
         winner = tournament_rows.sort_values(by='Fitness').head(1)
         winner_solution = winner['Solution'].iloc[0]
         tournament_solutions.append(winner_solution)
@@ -124,7 +132,7 @@ def tournament(population_w_fitness):
 def elite(population_w_fitness):
 
     # Sort the DataFrame by fitness in ascending order and select the top two
-    elites = population_w_fitness.sort_values(by='Fitness').head(4)
+    elites = population_w_fitness.sort_values(by='Fitness').head(5)
     elite_solutions = [elite for elite in elites['Solution'].values]
 
     # Remove the elite rows from the original DataFrame
@@ -135,12 +143,16 @@ def elite(population_w_fitness):
 
 def swap(parent):
     # Randomly select two distinct indices and do not select first or last one
-    index_1, index_2 = np.random.choice(np.arange(1, len(parent) - 1), size=2, replace=False)
+    index_1, index_2 = np.random.choice(np.arange(0, len(parent) - 1), size=2, replace=False)
+    if index_1 == 0:
+        parent[-1] = parent[index_2]
+    elif index_2 == 0:
+        parent[-1] = parent[index_1]
     parent[index_1], parent[index_2] = parent[index_2], parent[index_1]
     return parent
 
 
-def cycle_crossover(parents, mutation_chance=0.028):
+def cycle_crossover(parents, mutation_chance=0.02):
     # randomly select 2 parents but not the same(replace=False)
     selected_indices = np.random.choice(len(parents), size=2, replace=False)
     parent_x, parent_y = parents[selected_indices]
