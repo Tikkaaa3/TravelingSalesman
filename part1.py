@@ -1,9 +1,10 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 import travelingsalesman as tsp
 
 # Parse cities
-file1 = "cities/berlin11_modified.tsp"
+# file1 = "cities/berlin11_modified.tsp"
+file1 = "cities/kroA100.tsp"
 cities_df = tsp.parser(file1)
 
 # Display the solution for a greedy approach
@@ -44,11 +45,11 @@ print(parents)
 
 epoch = 0
 best_scores = []
-while epoch < 500:
+while epoch < 1000:
     # reset the pop for creating the new generation
     population = []
 
-    for _ in range(50):
+    for _ in range(200):
         # Cycle crossover gives me kid1 and kid2 with swap mutation option
         kid1, kid2 = tsp.cycle_crossover(parents)
         population.append(kid1)
@@ -70,3 +71,21 @@ print("\nMean:")
 print(mean)
 print("\nBest Score:")
 print(best_score)
+
+# Generate the x-axis values (epoch numbers)
+epochs = np.arange(len(best_scores))  # [0, 1, 2, ..., len(best_scores)-1]
+# Plot the data
+plt.figure(figsize=(8, 5))
+plt.plot(epochs, best_scores, marker='o', linestyle='-', color='b', label='Best Score')
+
+# Add labels and title
+plt.xlabel('Epoch Number')
+plt.ylabel('Best Fitness Score')
+plt.title('Best Fitness Score Over Epochs')
+plt.legend()
+
+# Show grid for better readability
+plt.grid()
+
+# Display the plot
+plt.show()
